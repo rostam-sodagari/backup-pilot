@@ -26,6 +26,7 @@ pip-wheel-metadata/
 *.egg-info/
 .installed.cfg
 *.egg
+.backup_pilot
 
 # Installer logs
 pip-log.txt
