@@ -4,17 +4,39 @@ from datetime import datetime, timezone
 
 from backup_pilot.core.interfaces import BackupStrategy, DatabaseConnector
 from backup_pilot.core.models import BackupRequest, BackupResult, BackupStatus
+from backup_pilot.metadata.store import BackupMetadataStore, BackupPoint
 
 
 class FullBackupStrategy(BackupStrategy):
     """
-    Simple full backup strategy.
+    Full backup strategy.
+
+    A full backup always captures a complete logical dump via the
+    connector. When a metadata store is provided, it also records this
+    backup as the new baseline for incremental and differential chains.
     """
 
+    def __init__(self, metadata_store: BackupMetadataStore | None = None, job_id: str | None = None) -> None:
+        self._store = metadata_store
+        self._job_id = job_id
+
     def run(self, connector: DatabaseConnector, request: BackupRequest) -> BackupResult:
-        # Connector is responsible for the actual backup stream; we just generate metadata.
         started_at = datetime.now(timezone.utc)
         backup_id = started_at.strftime("%Y%m%d%H%M%S")
+
+        # Trigger creation of the logical backup stream; the surrounding
+        # BackupService is responsible for piping it to storage.
+        stream = connector.create_backup_stream(request)
+
+        if self._store and self._job_id:
+            point = BackupPoint(
+                backup_id=backup_id,
+                backup_type=request.backup_type,
+                created_at=started_at,
+                position={},
+            )
+            self._store.update_after_full(job_id=self._job_id, point=point)
+
         return BackupResult(
             backup_id=backup_id,
             status=BackupStatus.RUNNING,
