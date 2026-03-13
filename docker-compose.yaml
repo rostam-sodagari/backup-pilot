@@ -1,0 +1,12 @@
+# Minimal compose for running BackupPilot (e.g. backup --help or backup with mounted config).
+# Mount your config and backup directory; set env vars for credentials as needed.
+services:
+  backup-pilot:
+    build: .
+    volumes:
+      - ./backup_pilot.yaml:/config/backup_pilot.yaml:ro
+      - ./backups:/backups
+    environment:
+      - BACKUP_PILOT_ENCRYPTION_KEY=${BACKUP_PILOT_ENCRYPTION_KEY:-}
+    entrypoint: ["backup-pilot"]
+    command: ["--help"]
