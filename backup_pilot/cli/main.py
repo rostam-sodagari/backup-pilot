@@ -22,11 +22,13 @@ from backup_pilot.services.backup_service import BackupService
 from backup_pilot.services.connection_service import ConnectionService
 from backup_pilot.services.restore_service import RestoreService
 from backup_pilot.services.rotation_service import run_rotation
+from backup_pilot.cli.wizard import wizard_app
 from backup_pilot.storage.factory import create_storage_backend
 from backup_pilot.compression.factory import create_compressor
 from backup_pilot.encryption.factory import create_encryptor
 
 app = typer.Typer(help="BackupPilot - database backup and restore CLI.")
+app.add_typer(wizard_app, name="wizard")
 
 
 def _load_environment() -> None:
@@ -147,6 +149,8 @@ def backup(
     db_profile = cfg.databases[backup_profile.database]
     storage_profile = cfg.storage[backup_profile.storage]
 
+    job_id = f"{backup_profile.database}:{profile}"
+
     db_params = DBConnectionParams(
         db_type=db_profile.type,
         host=db_profile.host,
@@ -159,7 +163,10 @@ def backup(
     )
 
     connector = create_connector(db_params)
-    strategy = create_strategy(backup_profile.backup_type)
+    strategy = create_strategy(
+        backup_profile.backup_type,
+        job_id=job_id,
+    )
     storage = create_storage_backend(
         {"type": storage_profile.type, **storage_profile.options}
     )
