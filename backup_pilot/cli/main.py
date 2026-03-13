@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from dotenv import load_dotenv
 
 from backup_pilot.config.loader import load_config
 from backup_pilot.core.models import (
@@ -26,6 +27,15 @@ from backup_pilot.compression.factory import create_compressor
 from backup_pilot.encryption.factory import create_encryptor
 
 app = typer.Typer(help="BackupPilot - database backup and restore CLI.")
+
+
+def _load_environment() -> None:
+    """
+    Load environment variables from a .env file in the current working directory.
+
+    OS-level environment variables always take precedence over values from .env.
+    """
+    load_dotenv(override=False)
 
 
 def _history_file_for(config_file: str) -> Path:
@@ -103,6 +113,9 @@ def main(
     """
     from backup_pilot import __version__
 
+    # Ensure .env (if present) is loaded before any subcommand runs.
+    _load_environment()
+
     if version:
         typer.echo(f"backup-pilot {__version__}")
         raise typer.Exit()
@@ -169,6 +182,13 @@ def backup(
         encryptor=encryptor,
         notifier=notifier,
         logger=logger,
+        profile_name=profile,
+        db_profile_name=backup_profile.database,
+        db_type=db_profile.type,
+        storage_profile_name=backup_profile.storage,
+        storage_type=storage_profile.type,
+        backup_type=backup_profile.backup_type,
+        encryption_mode=backup_profile.encryption,
     )
 
     request = BackupRequest(
@@ -178,6 +198,12 @@ def backup(
     )
 
     result = service.run_backup(request)
+    # Enrich result with context for logging and notifications.
+    result.db_profile_name = backup_profile.database
+    result.db_type = db_profile.type
+    result.storage_profile_name = backup_profile.storage
+    result.storage_type = storage_profile.type
+    result.encryption_mode = backup_profile.encryption
     _append_backup_history(
         config_file=config_file,
         profile=profile,

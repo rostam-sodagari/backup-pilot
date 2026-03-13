@@ -86,6 +86,23 @@ Run a backup using the profile:
 backup-pilot backup --profile daily_mysql_full --config-file backup_pilot.yaml
 ```
 
+### Configuration via .env
+
+When running `backup-pilot` directly on your host, BackupPilot will automatically
+load environment variables from a `.env` file in the current working directory
+if it exists. OS-level environment variables always take precedence.
+
+To get started:
+
+1. Copy `.env.example` to `.env`.
+2. Fill in values such as `BACKUP_PILOT_ENCRYPTION_KEY`, cloud storage
+   credentials, and notification settings.
+3. Run your backup command:
+
+```bash
+backup-pilot backup --profile daily_mysql_full --config-file backup_pilot.yaml
+```
+
 Each successful backup is recorded in a history file that lives next to your config file:
 
 - For `backup_pilot.yaml` the history file is `backup_pilot.history.jsonl`.
