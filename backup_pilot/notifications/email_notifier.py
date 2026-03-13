@@ -25,7 +25,9 @@ class EmailNotifier(NotifierBase):
         self._from = from_addr
         self._to = to_addr
 
-    def _send(self, subject: str, body: str) -> None:  # pragma: no cover - external SMTP
+    def _send(
+        self, subject: str, body: str
+    ) -> None:  # pragma: no cover - external SMTP
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = self._from
@@ -53,7 +55,9 @@ class EmailNotifier(NotifierBase):
         except Exception as exc:
             get_logger().warning("Email notification failed: %s", exc)
 
-    def notify_failure(self, result: BackupResult | RestoreResult, error: Exception) -> None:
+    def notify_failure(
+        self, result: BackupResult | RestoreResult, error: Exception
+    ) -> None:
         try:
             subject = "BackupPilot job failed"
             body = f"Status: {result.status.value}\nError: {error}"
@@ -62,4 +66,3 @@ class EmailNotifier(NotifierBase):
             self._send(subject, body)
         except Exception as exc:
             get_logger().warning("Email notification failed: %s", exc)
-

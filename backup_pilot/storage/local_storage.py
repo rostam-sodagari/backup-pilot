@@ -44,5 +44,6 @@ class LocalStorageBackend(StorageBackendBase):
             try:
                 path.unlink()
             except Exception as exc:  # pragma: no cover - filesystem specific
-                raise StorageError(f"Failed to delete local backup file: {path}") from exc
-
+                raise StorageError(
+                    f"Failed to delete local backup file: {path}"
+                ) from exc

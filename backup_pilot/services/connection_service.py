@@ -21,4 +21,3 @@ class ConnectionService:
         except Exception as exc:  # pragma: no cover - simple pass-through
             self._logger.exception("Database connection failed")
             raise ConnectionError("Database connection failed") from exc
-

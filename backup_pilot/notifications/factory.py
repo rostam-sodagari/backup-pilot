@@ -39,4 +39,3 @@ def create_notifiers(config: Optional[Dict[str, Any]]) -> List[Any]:
                 )
             )
     return notifiers
-

@@ -68,8 +68,9 @@ class BackupService:
             compressed_stream = self._compressor.compress(raw_stream)
             stream_to_upload = self._encryptor.encrypt(compressed_stream)
 
-            backup_id = strategy_result.backup_id or strategy_result.started_at.strftime(
-                "%Y%m%d%H%M%S"
+            backup_id = (
+                strategy_result.backup_id
+                or strategy_result.started_at.strftime("%Y%m%d%H%M%S")
             )
             location = self._storage.upload(backup_id, stream_to_upload)
 
@@ -84,7 +85,9 @@ class BackupService:
                 extra={
                     "backup_id": backup_id,
                     "location": location,
-                    "duration_seconds": (result.finished_at - started_at).total_seconds(),
+                    "duration_seconds": (
+                        result.finished_at - started_at
+                    ).total_seconds(),
                 },
             )
 
@@ -101,4 +104,3 @@ class BackupService:
             if self._notifier:
                 self._notifier.notify_failure(result, exc)
             raise BackupError("Backup operation failed") from exc
-

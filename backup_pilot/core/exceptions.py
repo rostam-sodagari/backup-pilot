@@ -16,4 +16,3 @@ class StorageError(BackupPilotError):
 
 class RestoreError(BackupPilotError):
     """Raised when a restore operation fails."""
-

@@ -71,7 +71,9 @@ class RestoreService:
                 "Restore completed",
                 extra={
                     "backup_id": request.backup_id,
-                    "duration_seconds": (result.finished_at - started_at).total_seconds(),
+                    "duration_seconds": (
+                        result.finished_at - started_at
+                    ).total_seconds(),
                 },
             )
 
@@ -88,4 +90,3 @@ class RestoreService:
             if self._notifier:
                 self._notifier.notify_failure(result, exc)
             raise RestoreError("Restore operation failed") from exc
-

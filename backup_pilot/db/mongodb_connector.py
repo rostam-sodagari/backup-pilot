@@ -36,7 +36,9 @@ class MongoDBConnector(DatabaseConnector):
             "db.runCommand({ ping: 1 })",
         ]
         try:
-            subprocess.check_call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call(
+                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
         except Exception as exc:  # pragma: no cover - depends on local tooling
             raise ConnectionError("Failed to connect to MongoDB") from exc
 
@@ -81,4 +83,3 @@ class MongoDBConnector(DatabaseConnector):
         ret = proc.wait()
         if ret != 0:  # pragma: no cover - depends on local tooling
             raise ConnectionError("MongoDB restore failed")
-

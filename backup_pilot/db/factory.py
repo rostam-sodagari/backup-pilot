@@ -31,4 +31,3 @@ def create_strategy(backup_type: BackupType):
     if backup_type == BackupType.DIFFERENTIAL:
         return DifferentialBackupStrategy()
     raise ValueError(f"Unsupported backup type: {backup_type}")
-

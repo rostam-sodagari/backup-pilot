@@ -25,7 +25,9 @@ class AzureBlobStorageBackend(StorageBackendBase):
         if connection_string:
             self._client = BlobServiceClient.from_connection_string(connection_string)
         else:
-            self._client = BlobServiceClient.from_connection_string("")  # pragma: no cover - placeholder
+            self._client = BlobServiceClient.from_connection_string(
+                ""
+            )  # pragma: no cover - placeholder
 
     def _blob_name(self, backup_id: str) -> str:
         if self._prefix:
@@ -49,7 +51,9 @@ class AzureBlobStorageBackend(StorageBackendBase):
             downloader = container_client.download_blob(blob_name)
             buffer.write(downloader.readall())
         except Exception as exc:  # pragma: no cover - network specific
-            raise StorageError("Failed to download backup from Azure Blob Storage") from exc
+            raise StorageError(
+                "Failed to download backup from Azure Blob Storage"
+            ) from exc
         buffer.seek(0)
         return buffer
 
@@ -59,5 +63,6 @@ class AzureBlobStorageBackend(StorageBackendBase):
             container_client = self._client.get_container_client(self._container)
             container_client.delete_blob(blob_name)
         except Exception as exc:  # pragma: no cover - network specific
-            raise StorageError("Failed to delete backup from Azure Blob Storage") from exc
-
+            raise StorageError(
+                "Failed to delete backup from Azure Blob Storage"
+            ) from exc

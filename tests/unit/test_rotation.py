@@ -3,9 +3,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
-import pytest
 
-from backup_pilot.config.models import AppConfig, BackupProfile, DatabaseProfile, StorageProfile
+from backup_pilot.config.models import (
+    AppConfig,
+    BackupProfile,
+    DatabaseProfile,
+    StorageProfile,
+)
 from backup_pilot.core.models import BackupRecord, DatabaseType
 from backup_pilot.services.rotation_service import run_rotation
 
@@ -15,8 +19,14 @@ def test_run_rotation_empty_history(tmp_path: Path) -> None:
     history_path.touch()
     cfg = AppConfig(
         databases={"d1": DatabaseProfile(type=DatabaseType.MYSQL)},
-        storage={"local": StorageProfile(type="local", options={"root_dir": str(tmp_path / "backups")})},
-        backups={"p1": BackupProfile(database="d1", storage="local", retention_count=2)},
+        storage={
+            "local": StorageProfile(
+                type="local", options={"root_dir": str(tmp_path / "backups")}
+            )
+        },
+        backups={
+            "p1": BackupProfile(database="d1", storage="local", retention_count=2)
+        },
     )
     removed = run_rotation(config=cfg, history_path=history_path)
     assert removed == 0
@@ -32,9 +42,24 @@ def test_run_rotation_retention_count(tmp_path: Path) -> None:
     history_path = tmp_path / "history.jsonl"
     base = datetime(2026, 1, 1, tzinfo=timezone.utc)
     records = [
-        BackupRecord(backup_id="id1", profile_name="p1", db_type=DatabaseType.MYSQL, created_at=base),
-        BackupRecord(backup_id="id2", profile_name="p1", db_type=DatabaseType.MYSQL, created_at=base),
-        BackupRecord(backup_id="id3", profile_name="p1", db_type=DatabaseType.MYSQL, created_at=base),
+        BackupRecord(
+            backup_id="id1",
+            profile_name="p1",
+            db_type=DatabaseType.MYSQL,
+            created_at=base,
+        ),
+        BackupRecord(
+            backup_id="id2",
+            profile_name="p1",
+            db_type=DatabaseType.MYSQL,
+            created_at=base,
+        ),
+        BackupRecord(
+            backup_id="id3",
+            profile_name="p1",
+            db_type=DatabaseType.MYSQL,
+            created_at=base,
+        ),
     ]
     with history_path.open("w", encoding="utf-8") as fh:
         for r in records:
@@ -42,8 +67,12 @@ def test_run_rotation_retention_count(tmp_path: Path) -> None:
 
     cfg = AppConfig(
         databases={"d1": DatabaseProfile(type=DatabaseType.MYSQL)},
-        storage={"local": StorageProfile(type="local", options={"root_dir": str(backup_dir)})},
-        backups={"p1": BackupProfile(database="d1", storage="local", retention_count=1)},
+        storage={
+            "local": StorageProfile(type="local", options={"root_dir": str(backup_dir)})
+        },
+        backups={
+            "p1": BackupProfile(database="d1", storage="local", retention_count=1)
+        },
     )
     removed = run_rotation(config=cfg, history_path=history_path)
     assert removed == 2
@@ -64,14 +93,18 @@ def test_run_rotation_no_retention_skipped(tmp_path: Path) -> None:
     (backup_dir / "id1.bak").write_bytes(b"a")
     history_path = tmp_path / "history.jsonl"
     record = BackupRecord(
-        backup_id="id1", profile_name="p1", db_type=DatabaseType.MYSQL,
+        backup_id="id1",
+        profile_name="p1",
+        db_type=DatabaseType.MYSQL,
         created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
     )
     history_path.write_text(record.model_dump_json() + "\n", encoding="utf-8")
 
     cfg = AppConfig(
         databases={"d1": DatabaseProfile(type=DatabaseType.MYSQL)},
-        storage={"local": StorageProfile(type="local", options={"root_dir": str(backup_dir)})},
+        storage={
+            "local": StorageProfile(type="local", options={"root_dir": str(backup_dir)})
+        },
         backups={"p1": BackupProfile(database="d1", storage="local")},  # no retention
     )
     removed = run_rotation(config=cfg, history_path=history_path)

@@ -32,4 +32,3 @@ def create_storage_backend(config: Dict[str, Any]):
             prefix=config.get("prefix"),
         )
     raise ValueError(f"Unsupported storage backend type: {backend_type}")
-

@@ -16,4 +16,3 @@ class DBConnectionParams:
     database: Optional[str] = None
     uri: Optional[str] = None
     path: Optional[str] = None  # for SQLite
-

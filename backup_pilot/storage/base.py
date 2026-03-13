@@ -20,4 +20,3 @@ class StorageBackendBase(ABC):
     @abstractmethod
     def delete(self, backup_id: str) -> None:
         raise NotImplementedError
-

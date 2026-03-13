@@ -20,7 +20,9 @@ def configure_logger(
         import json as _json
 
         class JsonFormatter(logging.Formatter):
-            def format(self, record: logging.LogRecord) -> str:  # pragma: no cover - formatting
+            def format(
+                self, record: logging.LogRecord
+            ) -> str:  # pragma: no cover - formatting
                 payload = {
                     "level": record.levelname,
                     "message": record.getMessage(),
@@ -46,7 +48,9 @@ def configure_logger(
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
         except OSError:  # pragma: no cover - filesystem specific
-            logger.warning("Could not open log file %s, logging to stream only", file_path)
+            logger.warning(
+                "Could not open log file %s, logging to stream only", file_path
+            )
 
     return logger
 
@@ -59,7 +63,9 @@ def configure_logger_from_config(logging_config: Optional[object]) -> logging.Lo
     logger.handlers.clear()
 
     if isinstance(logging_config, LoggingConfig) and (
-        logging_config.level or logging_config.file is not None or logging_config.json_format
+        logging_config.level
+        or logging_config.file is not None
+        or logging_config.json_format
     ):
         level_str = (logging_config.level or "INFO").upper()
         level = getattr(logging, level_str, logging.INFO)
@@ -73,4 +79,3 @@ def configure_logger_from_config(logging_config: Optional[object]) -> logging.Lo
 
 def get_logger(name: Optional[str] = None) -> logging.Logger:
     return logging.getLogger(name or "backup_pilot")
-

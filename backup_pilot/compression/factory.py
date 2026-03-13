@@ -10,4 +10,3 @@ def create_compressor(name: str):
     if name == "none":
         return NoOpCompressor()
     raise ValueError(f"Unsupported compression: {name}")
-

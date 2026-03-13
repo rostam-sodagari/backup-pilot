@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import BinaryIO, Iterable, Protocol
+from typing import BinaryIO, Protocol
 
 from .models import BackupRequest, BackupResult, RestoreRequest, RestoreResult
 
@@ -114,7 +114,9 @@ class Notifier(ABC):
         """
 
     @abstractmethod
-    def notify_failure(self, result: BackupResult | RestoreResult, error: Exception) -> None:
+    def notify_failure(
+        self, result: BackupResult | RestoreResult, error: Exception
+    ) -> None:
         """
         Send a failure notification for an operation.
         """
@@ -132,4 +134,3 @@ class LoggerLike(Protocol):
     def error(self, msg: str, *args, **kwargs) -> None: ...
 
     def exception(self, msg: str, *args, **kwargs) -> None: ...
-

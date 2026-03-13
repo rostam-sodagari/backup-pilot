@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import shutil
-from io import BufferedReader
 from pathlib import Path
 from typing import BinaryIO
 
@@ -38,4 +37,3 @@ class SQLiteConnector(DatabaseConnector):
         with open(tmp_path, "wb") as f:
             shutil.copyfileobj(stream, f)
         shutil.move(tmp_path, self._path)
-

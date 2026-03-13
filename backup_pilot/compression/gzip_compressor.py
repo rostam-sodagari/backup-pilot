@@ -25,4 +25,3 @@ class GzipCompressor(CompressorBase):
     def decompress(self, compressed_stream: BinaryIO) -> BinaryIO:
         gz = gzip.GzipFile(fileobj=compressed_stream, mode="rb")
         return BufferedReader(gz)
-

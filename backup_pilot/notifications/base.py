@@ -11,6 +11,7 @@ class NotifierBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def notify_failure(self, result: BackupResult | RestoreResult, error: Exception) -> None:
+    def notify_failure(
+        self, result: BackupResult | RestoreResult, error: Exception
+    ) -> None:
         raise NotImplementedError
-

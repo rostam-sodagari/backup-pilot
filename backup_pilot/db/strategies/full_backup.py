@@ -20,4 +20,3 @@ class FullBackupStrategy(BackupStrategy):
             status=BackupStatus.RUNNING,
             started_at=started_at,
         )
-

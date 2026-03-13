@@ -13,6 +13,9 @@ class IncrementalBackupStrategy(BackupStrategy):
     Attempting to use this strategy will raise a clear error.
     """
 
-    def run(self, connector: DatabaseConnector, request: BackupRequest) -> BackupResult:  # pragma: no cover - simple guard
-        raise BackupError("Incremental backups are not yet supported for this database type.")
-
+    def run(
+        self, connector: DatabaseConnector, request: BackupRequest
+    ) -> BackupResult:  # pragma: no cover - simple guard
+        raise BackupError(
+            "Incremental backups are not yet supported for this database type."
+        )

@@ -10,7 +10,9 @@ from backup_pilot.core.models import BackupType, DatabaseType
 class LoggingConfig(BaseModel):
     level: Optional[str] = "INFO"
     file: Optional[str] = None
-    json_format: Optional[bool] = Field(False, alias="json")  # use JSON formatter when True
+    json_format: Optional[bool] = Field(
+        False, alias="json"
+    )  # use JSON formatter when True
 
 
 class DatabaseProfile(BaseModel):
@@ -50,4 +52,3 @@ class AppConfig(BaseModel):
     backups: Dict[str, BackupProfile]
     notifications: Optional[NotificationConfig] = None
     logging: Optional[LoggingConfig] = None
-

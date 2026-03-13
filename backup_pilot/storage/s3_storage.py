@@ -48,4 +48,3 @@ class S3StorageBackend(StorageBackendBase):
             self._client.delete_object(Bucket=self._bucket, Key=key)
         except Exception as exc:  # pragma: no cover - network specific
             raise StorageError("Failed to delete backup from S3") from exc
-

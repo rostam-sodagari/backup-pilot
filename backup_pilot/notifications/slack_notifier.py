@@ -13,7 +13,12 @@ class SlackNotifier(NotifierBase):
     def __init__(self, webhook_url: str) -> None:
         self._webhook_url = webhook_url
 
-    def _build_payload(self, title: str, result: BackupResult | RestoreResult, error: Exception | None = None) -> Dict[str, Any]:
+    def _build_payload(
+        self,
+        title: str,
+        result: BackupResult | RestoreResult,
+        error: Exception | None = None,
+    ) -> Dict[str, Any]:
         text = f"*{title}*\nStatus: {result.status.value}"
         if error:
             text += f"\nError: `{error}`"
@@ -26,17 +31,20 @@ class SlackNotifier(NotifierBase):
             text += f"\nDuration: {delta.total_seconds():.1f}s"
         return {"text": text}
 
-    def notify_success(self, result: BackupResult | RestoreResult) -> None:  # pragma: no cover - outbound HTTP
+    def notify_success(
+        self, result: BackupResult | RestoreResult
+    ) -> None:  # pragma: no cover - outbound HTTP
         try:
             payload = self._build_payload("BackupPilot job succeeded", result)
             requests.post(self._webhook_url, json=payload, timeout=5)
         except Exception as exc:
             get_logger().warning("Slack notification failed: %s", exc)
 
-    def notify_failure(self, result: BackupResult | RestoreResult, error: Exception) -> None:  # pragma: no cover - outbound HTTP
+    def notify_failure(
+        self, result: BackupResult | RestoreResult, error: Exception
+    ) -> None:  # pragma: no cover - outbound HTTP
         try:
             payload = self._build_payload("BackupPilot job failed", result, error)
             requests.post(self._webhook_url, json=payload, timeout=5)
         except Exception as exc:
             get_logger().warning("Slack notification failed: %s", exc)
-

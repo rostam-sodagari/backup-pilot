@@ -11,8 +11,6 @@ from backup_pilot.config.loader import load_config
 from backup_pilot.core.models import (
     BackupRecord,
     BackupRequest,
-    BackupType,
-    DatabaseType,
     RestoreRequest,
 )
 from backup_pilot.db.base import DBConnectionParams
@@ -115,7 +113,9 @@ def main(
 
 @app.command("backup")
 def backup(
-    profile: str = typer.Option(..., "--profile", "-p", help="Backup profile name from config."),
+    profile: str = typer.Option(
+        ..., "--profile", "-p", help="Backup profile name from config."
+    ),
     config_file: str = typer.Option(
         "backup_pilot.yaml",
         "--config-file",
@@ -147,14 +147,18 @@ def backup(
 
     connector = create_connector(db_params)
     strategy = create_strategy(backup_profile.backup_type)
-    storage = create_storage_backend({"type": storage_profile.type, **storage_profile.options})
+    storage = create_storage_backend(
+        {"type": storage_profile.type, **storage_profile.options}
+    )
     compressor = create_compressor(backup_profile.compression)
     encryptor = create_encryptor(
         backup_profile.encryption,
         key=os.environ.get("BACKUP_PILOT_ENCRYPTION_KEY"),
     )
 
-    notifiers = create_notifiers(cfg.notifications.model_dump() if cfg.notifications else None)
+    notifiers = create_notifiers(
+        cfg.notifications.model_dump() if cfg.notifications else None
+    )
     notifier = notifiers[0] if notifiers else None
 
     service = BackupService(
@@ -180,12 +184,16 @@ def backup(
         db_profile=db_profile,
         result=result,
     )
-    typer.echo(f"Backup completed with ID {result.backup_id} at {result.storage_location}")
+    typer.echo(
+        f"Backup completed with ID {result.backup_id} at {result.storage_location}"
+    )
 
 
 @app.command("restore")
 def restore(
-    profile: str = typer.Option(..., "--profile", "-p", help="Backup profile name from config."),
+    profile: str = typer.Option(
+        ..., "--profile", "-p", help="Backup profile name from config."
+    ),
     backup_id: str = typer.Option(..., "--backup-id", help="Backup ID to restore."),
     config_file: str = typer.Option(
         "backup_pilot.yaml",
@@ -217,14 +225,18 @@ def restore(
     )
 
     connector = create_connector(db_params)
-    storage = create_storage_backend({"type": storage_profile.type, **storage_profile.options})
+    storage = create_storage_backend(
+        {"type": storage_profile.type, **storage_profile.options}
+    )
     compressor = create_compressor(backup_profile.compression)
     encryptor = create_encryptor(
         backup_profile.encryption,
         key=os.environ.get("BACKUP_PILOT_ENCRYPTION_KEY"),
     )
 
-    notifiers = create_notifiers(cfg.notifications.model_dump() if cfg.notifications else None)
+    notifiers = create_notifiers(
+        cfg.notifications.model_dump() if cfg.notifications else None
+    )
     notifier = notifiers[0] if notifiers else None
 
     service = RestoreService(
@@ -248,7 +260,9 @@ def restore(
 
 @app.command("test-connection")
 def test_connection(
-    db_profile: str = typer.Option(..., "--db-profile", "-d", help="Database profile name from config."),
+    db_profile: str = typer.Option(
+        ..., "--db-profile", "-d", help="Database profile name from config."
+    ),
     config_file: str = typer.Option(
         "backup_pilot.yaml",
         "--config-file",
@@ -407,4 +421,3 @@ def list_backups(
 
 if __name__ == "__main__":
     app()
-

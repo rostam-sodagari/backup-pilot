@@ -16,4 +16,3 @@ class CompressorBase(ABC):
     @abstractmethod
     def decompress(self, compressed_stream: BinaryIO) -> BinaryIO:
         raise NotImplementedError
-

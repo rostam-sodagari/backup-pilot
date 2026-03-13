@@ -72,4 +72,3 @@ class BackupRecord(BaseModel):
     created_at: datetime
     finished_at: Optional[datetime] = None
     size_bytes: Optional[int] = None
-

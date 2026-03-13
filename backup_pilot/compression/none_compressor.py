@@ -16,4 +16,3 @@ class NoOpCompressor(CompressorBase):
 
     def decompress(self, compressed_stream: BinaryIO) -> BinaryIO:
         return BufferedReader(compressed_stream)
-

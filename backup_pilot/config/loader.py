@@ -14,4 +14,3 @@ def load_config(path: Optional[str]) -> AppConfig:
         raise FileNotFoundError(f"Config file not found: {config_path}")
     raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     return AppConfig.model_validate(raw)
-

@@ -54,4 +54,3 @@ class GCSStorageBackend(StorageBackendBase):
             blob.delete()
         except Exception as exc:  # pragma: no cover - network specific
             raise StorageError("Failed to delete backup from GCS") from exc
-

@@ -4,11 +4,15 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any
 
-import pytest
 
 from cryptography.fernet import Fernet
 
-from backup_pilot.core.models import BackupRequest, BackupType, DatabaseType, RestoreRequest
+from backup_pilot.core.models import (
+    BackupRequest,
+    BackupType,
+    DatabaseType,
+    RestoreRequest,
+)
 from backup_pilot.encryption import FernetEncryptor
 from backup_pilot.services.backup_service import BackupService
 from backup_pilot.services.connection_service import ConnectionService
@@ -28,7 +32,9 @@ class DummyLogger:
     def error(self, msg: str, *args, **kwargs) -> None:  # pragma: no cover - trivial
         self.messages.append((msg, kwargs))
 
-    def exception(self, msg: str, *args, **kwargs) -> None:  # pragma: no cover - trivial
+    def exception(
+        self, msg: str, *args, **kwargs
+    ) -> None:  # pragma: no cover - trivial
         self.messages.append((msg, kwargs))
 
 
@@ -102,7 +108,9 @@ class DummyNotifier:
     def notify_success(self, result) -> None:  # pragma: no cover - trivial
         self.success_called = True
 
-    def notify_failure(self, result, error: Exception) -> None:  # pragma: no cover - trivial
+    def notify_failure(
+        self, result, error: Exception
+    ) -> None:  # pragma: no cover - trivial
         self.failure_called = True
 
 
@@ -228,4 +236,3 @@ def test_connection_service_uses_connector():
     service.test_connection()
 
     assert connector.connected is True
-

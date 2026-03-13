@@ -11,7 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from backup_pilot.core.models import BackupRecord, DatabaseType
+from backup_pilot.core.models import BackupRecord, DatabaseType  # noqa: E402
 
 cli_main = importlib.import_module("backup_pilot.cli.main")
 app = cli_main.app
@@ -78,4 +78,3 @@ def test_list_backups_reads_history(tmp_path: Path) -> None:
     assert "Recorded backups:" in result.stdout
     assert "daily_mysql_full" in result.stdout
     assert "20260312210710" in result.stdout
-

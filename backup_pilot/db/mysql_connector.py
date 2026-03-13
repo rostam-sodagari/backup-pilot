@@ -41,7 +41,12 @@ class MySQLConnector(DatabaseConnector):
             cmd.extend(["-D", self._p.database])
 
         try:
-            subprocess.check_call(cmd, env=self._base_env(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call(
+                cmd,
+                env=self._base_env(),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
         except Exception as exc:  # pragma: no cover - depends on local tooling
             raise ConnectionError("Failed to connect to MySQL") from exc
 
@@ -95,4 +100,3 @@ class MySQLConnector(DatabaseConnector):
         ret = proc.wait()
         if ret != 0:  # pragma: no cover - depends on local tooling
             raise ConnectionError("MySQL restore failed")
-
