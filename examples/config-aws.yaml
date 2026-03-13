@@ -1,0 +1,28 @@
+databases:
+  prod_mysql:
+    type: mysql
+    host: prod-db.example.com
+    port: 3306
+    username: backup_user
+    password: "${BACKUP_DB_PASSWORD}"
+    database: prod_app
+
+storage:
+  s3_primary:
+    type: s3
+    options:
+      bucket: my-backup-bucket
+      prefix: prod/mysql
+
+backups:
+  nightly_prod_full:
+    database: prod_mysql
+    storage: s3_primary
+    backup_type: full
+    compression: gzip
+    # encryption: fernet  # set BACKUP_PILOT_ENCRYPTION_KEY (base64 Fernet key) when using fernet
+
+notifications:
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+

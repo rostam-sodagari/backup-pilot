@@ -1,0 +1,34 @@
+databases:
+  local_mysql:
+    type: mysql
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: example
+    database: app_db
+
+storage:
+  local_fs:
+    type: local
+    options:
+      root_dir: ./backups
+
+backups:
+  daily_mysql_full:
+    database: local_mysql
+    storage: local_fs
+    backup_type: full
+    compression: gzip
+    # encryption: fernet  # set BACKUP_PILOT_ENCRYPTION_KEY (base64 Fernet key) when using fernet
+    # retention_count: 7   # keep at most 7 backups; run "backup-pilot rotate" to apply
+    # retention_days: 30   # delete backups older than 30 days
+
+# logging:
+#   level: INFO
+#   file: /var/log/backup_pilot.log
+#   json: false
+
+notifications:
+  slack:
+    webhook_url: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+

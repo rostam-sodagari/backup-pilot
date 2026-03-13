@@ -1,0 +1,21 @@
+databases:
+  local_mysql:
+    type: mysql
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: password
+    database: test_db
+
+storage:
+  local_fs:
+    type: local
+    options:
+      root_dir: ./backups
+
+backups:
+  daily_mysql_full:
+    database: local_mysql
+    storage: local_fs
+    backup_type: full
+    compression: gzip

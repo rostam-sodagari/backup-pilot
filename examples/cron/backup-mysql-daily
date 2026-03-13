@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Example cron script for running a daily MySQL backup with BackupPilot.
+#
+# Crontab entry (run at 2:30 AM every day):
+# 30 2 * * * /path/to/this/script.sh >> /var/log/backup_pilot_daily.log 2>&1
+
+set -euo pipefail
+
+PROJECT_DIR="/path/to/backup-pilot-project"
+cd "${PROJECT_DIR}"
+
+CONFIG_FILE="examples/config-basic.yaml"
+PROFILE="daily_mysql_full"
+
+backup-pilot backup --profile "${PROFILE}" --config-file "${CONFIG_FILE}"
+

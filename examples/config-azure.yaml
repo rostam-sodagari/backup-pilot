@@ -1,0 +1,29 @@
+databases:
+  prod_mongo:
+    type: mongodb
+    host: prod-mongo.example.com
+    port: 27017
+    username: backup_user
+    password: "${BACKUP_DB_PASSWORD}"
+    database: prod_app
+
+storage:
+  azure_primary:
+    type: azure
+    options:
+      container: my-backup-container
+      prefix: prod/mongo
+      connection_string: "${AZURE_STORAGE_CONNECTION_STRING}"
+
+backups:
+  nightly_mongo_full:
+    database: prod_mongo
+    storage: azure_primary
+    backup_type: full
+    compression: gzip
+    # encryption: fernet  # set BACKUP_PILOT_ENCRYPTION_KEY (base64 Fernet key) when using fernet
+
+notifications:
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+

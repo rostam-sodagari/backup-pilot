@@ -1,0 +1,28 @@
+databases:
+  prod_postgres:
+    type: postgresql
+    host: prod-pg.example.com
+    port: 5432
+    username: backup_user
+    password: "${BACKUP_DB_PASSWORD}"
+    database: prod_app
+
+storage:
+  gcs_primary:
+    type: gcs
+    options:
+      bucket: my-gcs-backup-bucket
+      prefix: prod/postgres
+
+backups:
+  nightly_pg_full:
+    database: prod_postgres
+    storage: gcs_primary
+    backup_type: full
+    compression: gzip
+    # encryption: fernet  # set BACKUP_PILOT_ENCRYPTION_KEY (base64 Fernet key) when using fernet
+
+notifications:
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+
