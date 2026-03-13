@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from backup_pilot.config.models import AppConfig
-from backup_pilot.core.models import BackupRecord
+from backup_pilot.core.models import BackupRecord, BackupType
 from backup_pilot.storage.factory import create_storage_backend
 
 
@@ -67,6 +67,23 @@ def run_rotation(
         # Sort newest first
         profile_records.sort(key=lambda r: r.created_at, reverse=True)
 
+        # Identify full backups that have at least one incremental or
+        # differential backup recorded after them for the same profile.
+        # These full backups are considered "chain roots" and are never
+        # deleted by rotation to avoid leaving orphaned incrementals/
+        # differentials that depend on a missing full.
+        fulls_with_dependents: set[str] = set()
+        # Use an oldest-first view to infer dependency chains based on
+        # backup_type and creation time.
+        chronological = sorted(profile_records, key=lambda r: r.created_at)
+        current_full_id: Optional[str] = None
+        for rec in chronological:
+            if rec.backup_type == BackupType.FULL:
+                current_full_id = rec.backup_id
+            elif rec.backup_type in (BackupType.INCREMENTAL, BackupType.DIFFERENTIAL):
+                if current_full_id:
+                    fulls_with_dependents.add(current_full_id)
+
         to_remove: list[BackupRecord] = []
         for i, record in enumerate(profile_records):
             remove = False
@@ -79,6 +96,16 @@ def run_rotation(
                     created = created.replace(tzinfo=timezone.utc)
                 if created < now - timedelta(days=retention_days):
                     remove = True
+
+            # Never delete a full backup that has incremental or
+            # differential backups related to it in history.
+            if (
+                remove
+                and record.backup_type == BackupType.FULL
+                and record.backup_id in fulls_with_dependents
+            ):
+                remove = False
+
             if remove:
                 to_remove.append(record)
 

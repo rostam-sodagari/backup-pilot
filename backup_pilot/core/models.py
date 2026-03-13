@@ -78,3 +78,6 @@ class BackupRecord(BaseModel):
     created_at: datetime
     finished_at: Optional[datetime] = None
     size_bytes: Optional[int] = None
+    # Optional backup type for rotation/chain-awareness; older history entries
+    # may omit this field and will be treated as unknown.
+    backup_type: Optional[BackupType] = None

@@ -93,6 +93,7 @@ def _append_backup_history(
         created_at=result.started_at,
         finished_at=result.finished_at,
         size_bytes=size_bytes,
+        backup_type=backup_profile.backup_type,
     )
 
     history_path.parent.mkdir(parents=True, exist_ok=True)

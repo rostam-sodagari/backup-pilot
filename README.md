@@ -106,7 +106,7 @@ backup-pilot backup --profile daily_mysql_full --config-file backup_pilot.yaml
 Each successful backup is recorded in a history file that lives next to your config file:
 
 - For `backup_pilot.yaml` the history file is `backup_pilot.history.jsonl`.
-- Each line is a JSON record containing the backup ID, profile, database type/name, storage location, timestamps, and (where available) size in bytes.
+- Each line is a JSON record containing the backup ID, profile, database type/name, storage location, timestamps, backup type, and (where available) size in bytes.
 
 You can list recorded backups:
 
@@ -203,6 +203,16 @@ For MySQL, PostgreSQL, and MongoDB, BackupPilot records database-native log posi
 When these prerequisites are not met, incremental and differential backups will raise a `BackupError` with a message describing the missing requirement (e.g., binlog/WAL/oplog not enabled or not accessible).
 
 This metadata is persisted under a `.backup_pilot/` directory (by default in the current working directory) and is used to track the last full and last backup positions for each job. Future versions can leverage these stored positions to narrow backups to only the relevant changes.
+
+### Rotation and safety for incremental/differential chains
+
+When you enable rotation using `retention_count` and/or `retention_days`, BackupPilot applies the policy **per backup profile**. Rotation deletes old backup artifacts from the configured storage backend and rewrites the history file to keep only the retained records.
+
+To avoid breaking incremental or differential chains:
+
+- **Full backups that have incremental or differential backups related to them are never deleted by rotation.**
+- A "related" backup means an incremental or differential backup recorded **after** a given full backup for the same profile in the history file.
+- This can result in keeping more full backups than `retention_count` alone would suggest, but it guarantees that incremental and differential backups are never left without their required base full backup.
 
 ## Docker
 
