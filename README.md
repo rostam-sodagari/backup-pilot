@@ -71,6 +71,13 @@ backups:
 notifications:
   slack:
     webhook_url: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+  # email (optional; from, to, smtp_host required):
+  #   smtp_host: smtp.example.com
+  #   smtp_port: 587
+  #   username: "${SMTP_USERNAME}"
+  #   password: "${SMTP_PASSWORD}"
+  #   from: backup-pilot@example.com
+  #   to: ops@example.com
 ```
 
 Run a backup using the profile:

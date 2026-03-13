@@ -31,4 +31,11 @@ backups:
 notifications:
   slack:
     webhook_url: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+  # email:
+  #   smtp_host: smtp.example.com
+  #   smtp_port: 587
+  #   username: "${SMTP_USERNAME}"
+  #   password: "${SMTP_PASSWORD}"
+  #   from: backup-pilot@example.com
+  #   to: ops@example.com
 
