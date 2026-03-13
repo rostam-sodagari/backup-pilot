@@ -1,5 +1,7 @@
 # BackupPilot
 
+![BackupPilot screenshot](screenshot.png)
+
 BackupPilot is a cross-platform Python command-line utility for backing up and restoring multiple databases with pluggable storage backends (local filesystem, AWS S3, Google Cloud Storage, Azure Blob Storage), compression, and optional notifications.
 
 ## Features
