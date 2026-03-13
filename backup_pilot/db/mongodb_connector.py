@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import subprocess
+from datetime import datetime, timezone
 from io import BufferedReader
-from typing import BinaryIO
+from typing import BinaryIO, Dict, Any
 
 from backup_pilot.core.exceptions import ConnectionError
 from backup_pilot.core.interfaces import DatabaseConnector
@@ -59,6 +60,46 @@ class MongoDBConnector(DatabaseConnector):
         )
         assert proc.stdout is not None
         return BufferedReader(proc.stdout)
+
+    def get_current_oplog_timestamp(self) -> Dict[str, Any]:
+        """
+        Return the current oplog timestamp for a replica set member.
+
+        This is a best-effort helper for incremental/differential backups
+        that consume oplog entries from a recorded timestamp.
+        """
+        cmd = [
+            "mongosh",
+            self._base_uri(),
+            "--quiet",
+            "--eval",
+            "var last = db.getSiblingDB('local').oplog.rs.find().sort({ $natural: -1 }).limit(1).next(); "
+            "if (last && last.ts) { "
+            "  printjson({ ts: last.ts, wall: last.wall || null }); "
+            "} else { printjson({ ts: null, wall: null }); }",
+        ]
+        try:
+            raw = subprocess.check_output(
+                cmd,
+                stderr=subprocess.DEVNULL,
+                text=True,
+            )
+        except Exception as exc:  # pragma: no cover - depends on local tooling
+            raise ConnectionError("Failed to obtain MongoDB oplog position") from exc
+
+        # The output will be a JSON document on the last line.
+        lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+        if not lines:  # pragma: no cover - defensive branch
+            return {"ts": None, "wall": None}
+
+        import json
+
+        try:
+            doc = json.loads(lines[-1])
+        except Exception:  # pragma: no cover - parse failures
+            return {"ts": None, "wall": None}
+
+        return {"ts": doc.get("ts"), "wall": doc.get("wall")}
 
     def restore_from_stream(self, request: RestoreRequest, stream: BinaryIO) -> None:
         cmd = [

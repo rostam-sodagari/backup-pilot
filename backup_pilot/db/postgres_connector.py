@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 from io import BufferedReader
-from typing import BinaryIO
+from typing import BinaryIO, Dict, Any
 
 from backup_pilot.core.exceptions import ConnectionError
 from backup_pilot.core.interfaces import DatabaseConnector
@@ -72,6 +72,51 @@ class PostgresConnector(DatabaseConnector):
         )
         assert proc.stdout is not None
         return BufferedReader(proc.stdout)
+
+    def get_current_lsn(self) -> Dict[str, Any]:
+        """
+        Return the current WAL LSN for the connected PostgreSQL instance.
+
+        This is a best-effort helper intended for incremental/differential
+        strategies that rely on WAL positions. It assumes the server
+        supports pg_current_wal_lsn() (PostgreSQL 10+) and falls back to
+        pg_current_xlog_location() for older versions.
+        """
+        # Prefer pg_current_wal_lsn(), fall back to pg_current_xlog_location().
+        query = (
+            "SELECT CASE "
+            "WHEN to_regproc('pg_current_wal_lsn') IS NOT NULL "
+            "THEN pg_current_wal_lsn()::text "
+            "ELSE pg_current_xlog_location()::text "
+            "END AS lsn;"
+        )
+        cmd = [
+            "psql",
+            "-h",
+            self._p.host or "localhost",
+            "-p",
+            str(self._p.port or 5432),
+            "-U",
+            self._p.username or "",
+            "-t",
+            "-A",
+            "-c",
+            query,
+        ]
+        if self._p.database:
+            cmd.extend(["-d", self._p.database])
+
+        try:
+            out = subprocess.check_output(
+                cmd,
+                env=self._base_env(),
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+        except Exception as exc:  # pragma: no cover - depends on local tooling
+            raise ConnectionError("Failed to obtain PostgreSQL WAL LSN") from exc
+
+        return {"lsn": out}
 
     def restore_from_stream(self, request: RestoreRequest, stream: BinaryIO) -> None:
         # Use pg_restore for custom format, piped from stdin.
