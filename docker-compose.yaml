@@ -3,9 +3,11 @@
 services:
   backup-pilot:
     build: .
+    env_file:
+      - .env
     volumes:
-      - ./backup_pilot.yaml:/config/backup_pilot.yaml:ro
-      - ./backups:/backups
+      - ./backup_pilot.yaml:/app/backup_pilot.yaml:ro
+      - ./backups:/app/backups
     environment:
       - BACKUP_PILOT_ENCRYPTION_KEY=${BACKUP_PILOT_ENCRYPTION_KEY:-}
     entrypoint: ["backup-pilot"]
