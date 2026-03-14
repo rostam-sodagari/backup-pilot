@@ -4,7 +4,13 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import BinaryIO, Protocol
 
-from .models import BackupRequest, BackupResult, BackupType, RestoreRequest, RestoreResult
+from .models import (
+    BackupRequest,
+    BackupResult,
+    BackupType,
+    RestoreRequest,
+    RestoreResult,
+)
 
 
 class DatabaseConnector(ABC):

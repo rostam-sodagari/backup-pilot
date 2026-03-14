@@ -3,7 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from backup_pilot.core.interfaces import BackupStrategy, DatabaseConnector
-from backup_pilot.core.models import BackupRequest, BackupResult, BackupStatus, BackupType
+from backup_pilot.core.models import (
+    BackupRequest,
+    BackupResult,
+    BackupStatus,
+    BackupType,
+)
 from backup_pilot.metadata.store import BackupMetadataStore, BackupPoint
 
 
