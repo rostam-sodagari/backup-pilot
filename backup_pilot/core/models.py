@@ -16,8 +16,6 @@ class DatabaseType(str, Enum):
 
 class BackupType(str, Enum):
     FULL = "full"
-    INCREMENTAL = "incremental"
-    DIFFERENTIAL = "differential"
 
 
 class BackupStatus(str, Enum):
@@ -41,6 +39,12 @@ class BackupResult(BaseModel):
     finished_at: Optional[datetime] = None
     storage_location: Optional[str] = None
     message: Optional[str] = None
+    db_profile_name: Optional[str] = None
+    db_type: Optional[DatabaseType] = None
+    storage_profile_name: Optional[str] = None
+    storage_type: Optional[str] = None
+    encryption_mode: Optional[str] = None
+    error_code: Optional[str] = None
 
 
 class RestoreRequest(BaseModel):
@@ -72,3 +76,5 @@ class BackupRecord(BaseModel):
     created_at: datetime
     finished_at: Optional[datetime] = None
     size_bytes: Optional[int] = None
+    # Optional backup type for rotation; older history entries may omit this field.
+    backup_type: Optional[BackupType] = None

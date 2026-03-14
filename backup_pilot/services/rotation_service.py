@@ -79,6 +79,7 @@ def run_rotation(
                     created = created.replace(tzinfo=timezone.utc)
                 if created < now - timedelta(days=retention_days):
                     remove = True
+
             if remove:
                 to_remove.append(record)
 

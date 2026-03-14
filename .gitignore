@@ -26,6 +26,7 @@ pip-wheel-metadata/
 *.egg-info/
 .installed.cfg
 *.egg
+.backup_pilot
 
 # Installer logs
 pip-log.txt
@@ -52,7 +53,7 @@ Thumbs.db
 # Local backups and examples
 backups/
 examples/*secrets*.yaml
-
+backup_pilot_e2e_harness/
 # Generated backup history (per-config, local to repo)
 *.history.jsonl
 

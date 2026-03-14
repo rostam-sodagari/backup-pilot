@@ -6,12 +6,14 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from dotenv import load_dotenv
 
 from backup_pilot.config.loader import load_config
 from backup_pilot.core.models import (
     BackupRecord,
     BackupRequest,
     RestoreRequest,
+    BackupType,
 )
 from backup_pilot.db.base import DBConnectionParams
 from backup_pilot.db.factory import create_connector, create_strategy
@@ -21,11 +23,22 @@ from backup_pilot.services.backup_service import BackupService
 from backup_pilot.services.connection_service import ConnectionService
 from backup_pilot.services.restore_service import RestoreService
 from backup_pilot.services.rotation_service import run_rotation
+from backup_pilot.cli.wizard import wizard_app
 from backup_pilot.storage.factory import create_storage_backend
 from backup_pilot.compression.factory import create_compressor
 from backup_pilot.encryption.factory import create_encryptor
 
 app = typer.Typer(help="BackupPilot - database backup and restore CLI.")
+app.add_typer(wizard_app, name="wizard")
+
+
+def _load_environment() -> None:
+    """
+    Load environment variables from a .env file in the current working directory.
+
+    OS-level environment variables always take precedence over values from .env.
+    """
+    load_dotenv(override=False)
 
 
 def _history_file_for(config_file: str) -> Path:
@@ -46,6 +59,7 @@ def _append_backup_history(
     profile: str,
     db_profile,
     result,
+    backup_type: BackupType,
 ) -> None:
     """
     Append a single backup record to the history file.
@@ -81,6 +95,7 @@ def _append_backup_history(
         created_at=result.started_at,
         finished_at=result.finished_at,
         size_bytes=size_bytes,
+        backup_type=backup_type,
     )
 
     history_path.parent.mkdir(parents=True, exist_ok=True)
@@ -102,6 +117,9 @@ def main(
     Entry point for the BackupPilot CLI.
     """
     from backup_pilot import __version__
+
+    # Ensure .env (if present) is loaded before any subcommand runs.
+    _load_environment()
 
     if version:
         typer.echo(f"backup-pilot {__version__}")
@@ -134,6 +152,8 @@ def backup(
     db_profile = cfg.databases[backup_profile.database]
     storage_profile = cfg.storage[backup_profile.storage]
 
+    job_id = f"{backup_profile.database}:{backup_profile.storage}"
+
     db_params = DBConnectionParams(
         db_type=db_profile.type,
         host=db_profile.host,
@@ -146,7 +166,10 @@ def backup(
     )
 
     connector = create_connector(db_params)
-    strategy = create_strategy(backup_profile.backup_type)
+    strategy = create_strategy(
+        backup_profile.backup_type,
+        job_id=job_id,
+    )
     storage = create_storage_backend(
         {"type": storage_profile.type, **storage_profile.options}
     )
@@ -169,6 +192,13 @@ def backup(
         encryptor=encryptor,
         notifier=notifier,
         logger=logger,
+        profile_name=profile,
+        db_profile_name=backup_profile.database,
+        db_type=db_profile.type,
+        storage_profile_name=backup_profile.storage,
+        storage_type=storage_profile.type,
+        backup_type=backup_profile.backup_type,
+        encryption_mode=backup_profile.encryption,
     )
 
     request = BackupRequest(
@@ -178,11 +208,18 @@ def backup(
     )
 
     result = service.run_backup(request)
+    # Enrich result with context for logging and notifications.
+    result.db_profile_name = backup_profile.database
+    result.db_type = db_profile.type
+    result.storage_profile_name = backup_profile.storage
+    result.storage_type = storage_profile.type
+    result.encryption_mode = backup_profile.encryption
     _append_backup_history(
         config_file=config_file,
         profile=profile,
         db_profile=db_profile,
         result=result,
+        backup_type=backup_profile.backup_type,
     )
     typer.echo(
         f"Backup completed with ID {result.backup_id} at {result.storage_location}"

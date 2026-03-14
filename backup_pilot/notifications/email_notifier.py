@@ -63,6 +63,18 @@ class EmailNotifier(NotifierBase):
             body = f"Status: {result.status.value}\nError: {error}"
             if getattr(result, "backup_id", None):
                 body += f"\nBackup ID: {getattr(result, 'backup_id')}"
+            if getattr(result, "db_profile_name", None):
+                body += f"\nDB profile: {result.db_profile_name}"
+            if getattr(result, "db_type", None):
+                body += f"\nDB type: {getattr(result, 'db_type').value}"
+            if getattr(result, "storage_profile_name", None):
+                body += f"\nStorage: {result.storage_profile_name}"
+            if getattr(result, "storage_type", None):
+                body += f"\nStorage type: {result.storage_type}"
+            if getattr(result, "encryption_mode", None):
+                body += f"\nEncryption: {result.encryption_mode}"
+            if getattr(result, "error_code", None):
+                body += f"\nError code: {result.error_code}"
             self._send(subject, body)
         except Exception as exc:
             get_logger().warning("Email notification failed: %s", exc)

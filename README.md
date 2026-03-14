@@ -1,13 +1,13 @@
 # BackupPilot
 
-![BackupPilot screenshot](screenshot.png)
+BackupPilot screenshot
 
 BackupPilot is a cross-platform Python command-line utility for backing up and restoring multiple databases with pluggable storage backends (local filesystem, AWS S3, Google Cloud Storage, Azure Blob Storage), compression, and optional notifications.
 
 ## Features
 
 - **Multiple databases**: MySQL, PostgreSQL, MongoDB, SQLite (extensible to others).
-- **Backup types**: Full, with design for incremental and differential backups where supported.
+- **Backup types**: Full only (incremental and differential planned for a future release).
 - **Storage options**: Local filesystem, AWS S3, Google Cloud Storage, Azure Blob Storage.
 - **Compression**: Gzip by default, with an extensible compression interface.
 - **Encryption**: Optional at-rest encryption for backups; use `encryption: none` (default) or `encryption: fernet` with the key supplied via the `BACKUP_PILOT_ENCRYPTION_KEY` environment variable (base64-encoded Fernet key).
@@ -20,6 +20,8 @@ BackupPilot is a cross-platform Python command-line utility for backing up and r
 ## Installation
 
 ```bash
+git clone https://github.com/rostam-sodagari/backup-pilot.git
+cd backup-pilot
 pip install .
 ```
 
@@ -86,10 +88,27 @@ Run a backup using the profile:
 backup-pilot backup --profile daily_mysql_full --config-file backup_pilot.yaml
 ```
 
+### Configuration via .env
+
+When running `backup-pilot` directly on your host, BackupPilot will automatically
+load environment variables from a `.env` file in the current working directory
+if it exists. OS-level environment variables always take precedence.
+
+To get started:
+
+1. Copy `.env.example` to `.env`.
+2. Fill in values such as `BACKUP_PILOT_ENCRYPTION_KEY`, cloud storage
+  credentials, and notification settings.
+3. Run your backup command:
+
+```bash
+backup-pilot backup --profile daily_mysql_full --config-file backup_pilot.yaml
+```
+
 Each successful backup is recorded in a history file that lives next to your config file:
 
 - For `backup_pilot.yaml` the history file is `backup_pilot.history.jsonl`.
-- Each line is a JSON record containing the backup ID, profile, database type/name, storage location, timestamps, and (where available) size in bytes.
+- Each line is a JSON record containing the backup ID, profile, database type/name, storage location, timestamps, backup type, and (where available) size in bytes.
 
 You can list recorded backups:
 
@@ -136,6 +155,30 @@ The CLI currently exposes the following top-level commands:
 - `backup-pilot test-connection`
 - `backup-pilot list-configs`
 - `backup-pilot list-backups`
+- `backup-pilot wizard run` (interactive configuration and optional execution)
+
+### Interactive wizard
+
+You can use the wizard to interactively create or update a configuration and optionally run a backup immediately:
+
+```bash
+backup-pilot wizard run --config-file backup_pilot.yaml
+```
+
+The wizard will prompt you for:
+
+- **Database type** (MySQL/MariaDB, PostgreSQL, MongoDB, SQLite)
+- **Connection details** (host, port, username, password, database name)
+- **Storage profile** (local path)
+- **Backup profile name and backup type** (full only)
+
+At the end, it saves the configuration and, by default, runs the backup using the new profile.
+
+Incremental and differential backups are planned for a future release. Currently only full backups are supported.
+
+### Rotation
+
+When you enable rotation using `retention_count` and/or `retention_days`, BackupPilot applies the policy **per backup profile**. Rotation deletes old backup artifacts from the configured storage backend and rewrites the history file to keep only the retained records.
 
 ## Docker
 
@@ -153,6 +196,14 @@ docker run --rm -v /path/to/backup_pilot.yaml:/config/backup_pilot.yaml -v /path
 
 Use environment variables for secrets (e.g. `BACKUP_PILOT_ENCRYPTION_KEY`, `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` for S3, or your cloud provider’s preferred vars).
 
+The Docker image includes the following OS-level database client tools:
+
+- **MySQL/MariaDB**: `mysql`, `mysqldump`
+- **PostgreSQL**: `psql`, `pg_dump` (via `postgresql-client`)
+- **MongoDB**: `mongosh`, `mongodump`, `mongorestore`
+
+If you run BackupPilot outside Docker, ensure these tools are installed on your system and available on `PATH`.
+
 ## CI
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push and pull requests: tests (Python 3.10–3.12), Ruff and Black lint, and package build.
@@ -166,4 +217,3 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push and pull reque
 - **Cron script example**: `examples/cron/backup-mysql-daily`
 
 These examples are starting points; you should adapt hostnames, credentials, buckets/containers, and schedule to your environment.
-

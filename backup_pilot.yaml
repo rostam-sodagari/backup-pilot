@@ -1,32 +1,30 @@
 databases:
   local_mysql:
     type: mysql
-    host: 127.0.0.1
-    port: 3306
-    username: root
-    password: password
-    database: test_db
-
+    host: ${MYSQL_HOST}
+    port: ${MYSQL_PORT}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    database: ${MYSQL_DATABASE}
 storage:
   local_fs:
     type: local
     options:
       root_dir: ./backups
-
 backups:
   daily_mysql_full:
     database: local_mysql
     storage: local_fs
     backup_type: full
     compression: gzip
-
-# notifications:
-#   slack:
-#     webhook_url: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
-#   email:
-#     smtp_host: smtp.example.com
-#     smtp_port: 587
-#     username: "${SMTP_USERNAME}"
-#     password: "${SMTP_PASSWORD}"
-#     from: backup-pilot@example.com
-#     to: ops@example.com
+    encryption: fernet
+    retention_count: 7
+    retention_days: 30
+notifications:
+  slack:
+    webhook_url: ${SLACK_WEBHOOK_URL}
+  email: null
+logging:
+  level: INFO
+  file: ./backup_pilot.log
+  json: false

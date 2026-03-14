@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from backup_pilot.core.models import BackupType, DatabaseType
 from backup_pilot.db.base import DBConnectionParams
 from backup_pilot.db.mongodb_connector import MongoDBConnector
 from backup_pilot.db.mysql_connector import MySQLConnector
 from backup_pilot.db.postgres_connector import PostgresConnector
 from backup_pilot.db.sqlite_connector import SQLiteConnector
-from backup_pilot.db.strategies.differential_backup import DifferentialBackupStrategy
 from backup_pilot.db.strategies.full_backup import FullBackupStrategy
-from backup_pilot.db.strategies.incremental_backup import IncrementalBackupStrategy
+from backup_pilot.metadata.store import BackupMetadataStore
 
 
 def create_connector(params: DBConnectionParams):
@@ -23,11 +24,19 @@ def create_connector(params: DBConnectionParams):
     raise ValueError(f"Unsupported database type: {params.db_type}")
 
 
-def create_strategy(backup_type: BackupType):
-    if backup_type == BackupType.FULL:
-        return FullBackupStrategy()
-    if backup_type == BackupType.INCREMENTAL:
-        return IncrementalBackupStrategy()
-    if backup_type == BackupType.DIFFERENTIAL:
-        return DifferentialBackupStrategy()
-    raise ValueError(f"Unsupported backup type: {backup_type}")
+def create_strategy(
+    backup_type: BackupType,
+    *,
+    job_id: str,
+    metadata_dir: str | None = None,
+):
+    """
+    Factory for backup strategies.
+
+    job_id is used for metadata store state (e.g. for future use). The
+    metadata directory defaults to a `.backup_pilot` folder next to the
+    current working directory.
+    """
+    root = Path(metadata_dir) if metadata_dir else Path(".backup_pilot")
+    store = BackupMetadataStore(root)
+    return FullBackupStrategy(metadata_store=store, job_id=job_id)
