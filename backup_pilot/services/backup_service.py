@@ -87,9 +87,8 @@ class BackupService:
         self._logger.info(
             "Starting backup",
             **self._log_extra(
-                profile_name=request.profile_name or self._base_log_context.get(
-                    "profile_name"
-                ),
+                profile_name=request.profile_name
+                or self._base_log_context.get("profile_name"),
                 db_type=getattr(request.db_type, "value", request.db_type),
                 backup_type=getattr(request.backup_type, "value", request.backup_type),
                 request=request.model_dump(),
@@ -149,9 +148,7 @@ class BackupService:
                     ),
                     backup_id=backup_id,
                     storage_location=location,
-                    duration_seconds=(
-                        result.finished_at - started_at
-                    ).total_seconds(),
+                    duration_seconds=(result.finished_at - started_at).total_seconds(),
                     status=BackupStatus.SUCCESS.value,
                 ),
             )
