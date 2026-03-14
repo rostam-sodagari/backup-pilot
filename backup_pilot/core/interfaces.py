@@ -32,7 +32,8 @@ class DatabaseConnector(ABC):
 
 class BackupStrategy(ABC):
     """
-    Encapsulates full / incremental / differential backup behavior.
+    Encapsulates full backup behavior. Incremental and differential
+    support are planned for a future release.
     """
 
     @abstractmethod

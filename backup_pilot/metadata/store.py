@@ -137,23 +137,3 @@ class BackupMetadataStore:
         self._save(state)
         return state
 
-    def update_after_incremental(self, *, job_id: str, point: BackupPoint) -> JobState:
-        """
-        Record a completed incremental backup for the given job.
-        """
-        state = self.get_job_state(job_id)
-        state.last_backup = point
-        self._save(state)
-        return state
-
-    def update_after_differential(
-        self, *, job_id: str, point: BackupPoint
-    ) -> JobState:
-        """
-        Record a completed differential backup for the given job.
-        """
-        state = self.get_job_state(job_id)
-        state.last_backup = point
-        self._save(state)
-        return state
-

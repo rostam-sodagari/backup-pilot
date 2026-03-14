@@ -12,8 +12,9 @@ class FullBackupStrategy(BackupStrategy):
     Full backup strategy.
 
     A full backup always captures a complete logical dump via the
-    connector. When a metadata store is provided, it also records this
-    backup as the new baseline for incremental and differential chains.
+    connector. When a metadata store is provided, it records this
+    backup for history; the state is available for future incremental
+    and differential support.
     """
 
     def __init__(self, metadata_store: BackupMetadataStore | None = None, job_id: str | None = None) -> None:

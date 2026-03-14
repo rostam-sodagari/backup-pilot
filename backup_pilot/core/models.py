@@ -16,8 +16,6 @@ class DatabaseType(str, Enum):
 
 class BackupType(str, Enum):
     FULL = "full"
-    INCREMENTAL = "incremental"
-    DIFFERENTIAL = "differential"
 
 
 class BackupStatus(str, Enum):
@@ -78,6 +76,5 @@ class BackupRecord(BaseModel):
     created_at: datetime
     finished_at: Optional[datetime] = None
     size_bytes: Optional[int] = None
-    # Optional backup type for rotation/chain-awareness; older history entries
-    # may omit this field and will be treated as unknown.
+    # Optional backup type for rotation; older history entries may omit this field.
     backup_type: Optional[BackupType] = None

@@ -1,13 +1,13 @@
 # BackupPilot
 
-![BackupPilot screenshot](screenshot.png)
+BackupPilot screenshot
 
 BackupPilot is a cross-platform Python command-line utility for backing up and restoring multiple databases with pluggable storage backends (local filesystem, AWS S3, Google Cloud Storage, Azure Blob Storage), compression, and optional notifications.
 
 ## Features
 
 - **Multiple databases**: MySQL, PostgreSQL, MongoDB, SQLite (extensible to others).
-- **Backup types**: Full, plus initial incremental and differential backups backed by database-native logs (binlog, WAL, oplog) where supported.
+- **Backup types**: Full only (incremental and differential planned for a future release).
 - **Storage options**: Local filesystem, AWS S3, Google Cloud Storage, Azure Blob Storage.
 - **Compression**: Gzip by default, with an extensible compression interface.
 - **Encryption**: Optional at-rest encryption for backups; use `encryption: none` (default) or `encryption: fernet` with the key supplied via the `BACKUP_PILOT_ENCRYPTION_KEY` environment variable (base64-encoded Fernet key).
@@ -20,6 +20,8 @@ BackupPilot is a cross-platform Python command-line utility for backing up and r
 ## Installation
 
 ```bash
+git clone https://github.com/rostam-sodagari/backup-pilot.git
+cd backup-pilot
 pip install .
 ```
 
@@ -96,7 +98,7 @@ To get started:
 
 1. Copy `.env.example` to `.env`.
 2. Fill in values such as `BACKUP_PILOT_ENCRYPTION_KEY`, cloud storage
-   credentials, and notification settings.
+  credentials, and notification settings.
 3. Run your backup command:
 
 ```bash
@@ -168,51 +170,15 @@ The wizard will prompt you for:
 - **Database type** (MySQL/MariaDB, PostgreSQL, MongoDB, SQLite)
 - **Connection details** (host, port, username, password, database name)
 - **Storage profile** (local path)
-- **Backup profile name and backup type** (`full`, `incremental`, or `differential`)
+- **Backup profile name and backup type** (full only)
 
 At the end, it saves the configuration and, by default, runs the backup using the new profile.
 
-### Incremental and differential backups
+Incremental and differential backups are planned for a future release. Currently only full backups are supported.
 
-BackupPilot models backup types as:
-
-- **Full**: A complete logical dump of the database.
-- **Incremental**: Logically associated with changes since the **last backup of any type** (full, incremental, or differential).
-- **Differential**: Logically associated with changes since the **last full backup**.
-
-For MySQL, PostgreSQL, and MongoDB, BackupPilot records database-native log positions per backup job. **Incremental and differential backups require additional database-level configuration** so that these log positions are available:
-
-- **MySQL/MariaDB**: Binary log file and position from `SHOW MASTER STATUS` via `mysql` / `mysqldump`.
-  - Enable binary logging in your MySQL/MariaDB configuration, for example:
-
-    ```ini
-    [mysqld]
-    server-id = 1
-    log_bin = /var/log/mysql/mysql-bin.log
-    binlog_format = ROW
-    ```
-
-  - Ensure that running `SHOW MASTER STATUS;` as the BackupPilot user returns a row with `File` and `Position`. If BackupPilot cannot parse this output, incremental/differential MySQL backups will fail with a `BackupError` explaining that binary logging must be enabled.
-
-- **PostgreSQL**: Current WAL LSN via `psql` using `pg_current_wal_lsn()` or `pg_current_xlog_location()`.
-  - Ensure WAL is enabled and the BackupPilot user has permission to call the appropriate function.
-
-- **MongoDB**: Oplog timestamp from the `local.oplog.rs` collection, using `mongosh`.
-  - Run in replica set mode with an oplog configured, and ensure the BackupPilot user can read from `local.oplog.rs`.
-
-When these prerequisites are not met, incremental and differential backups will raise a `BackupError` with a message describing the missing requirement (e.g., binlog/WAL/oplog not enabled or not accessible).
-
-This metadata is persisted under a `.backup_pilot/` directory (by default in the current working directory) and is used to track the last full and last backup positions for each job. Future versions can leverage these stored positions to narrow backups to only the relevant changes.
-
-### Rotation and safety for incremental/differential chains
+### Rotation
 
 When you enable rotation using `retention_count` and/or `retention_days`, BackupPilot applies the policy **per backup profile**. Rotation deletes old backup artifacts from the configured storage backend and rewrites the history file to keep only the retained records.
-
-To avoid breaking incremental or differential chains:
-
-- **Full backups that have incremental or differential backups related to them are never deleted by rotation.**
-- A "related" backup means an incremental or differential backup recorded **after** a given full backup for the same profile in the history file.
-- This can result in keeping more full backups than `retention_count` alone would suggest, but it guarantees that incremental and differential backups are never left without their required base full backup.
 
 ## Docker
 
@@ -251,4 +217,3 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push and pull reque
 - **Cron script example**: `examples/cron/backup-mysql-daily`
 
 These examples are starting points; you should adapt hostnames, credentials, buckets/containers, and schedule to your environment.
-

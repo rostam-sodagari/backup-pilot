@@ -53,7 +53,7 @@ def run_wizard(
         "Backup profile name", default="daily_backup"
     ).strip()
     backup_type = typer.prompt(
-        "Backup type (full/incremental/differential)", default="full"
+        "Backup type (full only)", default="full"
     ).strip()
 
     cfg_path = Path(config_file)

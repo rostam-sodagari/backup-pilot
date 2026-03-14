@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Only full backups are supported. Incremental and differential backup support has been removed and is planned for a future release. If you have existing history files (`.history.jsonl`) that contain incremental or differential entries, you may need to clear or regenerate them.
+
 ## [0.1.0] - 2026-03-13
 
 ### Added

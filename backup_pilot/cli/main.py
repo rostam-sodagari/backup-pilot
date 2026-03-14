@@ -9,11 +9,7 @@ import typer
 from dotenv import load_dotenv
 
 from backup_pilot.config.loader import load_config
-from backup_pilot.core.models import (
-    BackupRecord,
-    BackupRequest,
-    RestoreRequest,
-)
+from backup_pilot.core.models import BackupRecord, BackupRequest, RestoreRequest, BackupType
 from backup_pilot.db.base import DBConnectionParams
 from backup_pilot.db.factory import create_connector, create_strategy
 from backup_pilot.logging.logger import configure_logger_from_config, get_logger
@@ -58,6 +54,7 @@ def _append_backup_history(
     profile: str,
     db_profile,
     result,
+    backup_type: BackupType,
 ) -> None:
     """
     Append a single backup record to the history file.
@@ -93,7 +90,7 @@ def _append_backup_history(
         created_at=result.started_at,
         finished_at=result.finished_at,
         size_bytes=size_bytes,
-        backup_type=backup_profile.backup_type,
+        backup_type=backup_type,
     )
 
     history_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,7 +147,7 @@ def backup(
     db_profile = cfg.databases[backup_profile.database]
     storage_profile = cfg.storage[backup_profile.storage]
 
-    job_id = f"{backup_profile.database}:{profile}"
+    job_id = f"{backup_profile.database}:{backup_profile.storage}"
 
     db_params = DBConnectionParams(
         db_type=db_profile.type,
@@ -217,6 +214,7 @@ def backup(
         profile=profile,
         db_profile=db_profile,
         result=result,
+        backup_type=backup_profile.backup_type,
     )
     typer.echo(
         f"Backup completed with ID {result.backup_id} at {result.storage_location}"
