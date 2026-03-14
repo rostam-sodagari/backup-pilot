@@ -66,6 +66,9 @@ class DummyStrategy:
             started_at=datetime.utcnow(),
         )
 
+    def record_success(self, backup_id: str, backup_type: Any, created_at: Any) -> None:
+        pass
+
 
 class DummyStorage:
     def __init__(self) -> None:

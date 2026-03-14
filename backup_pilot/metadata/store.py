@@ -72,7 +72,10 @@ class BackupMetadataStore:
         self._root_dir.mkdir(parents=True, exist_ok=True)
 
     def _path_for(self, job_id: str) -> Path:
-        safe_id = job_id.replace("/", "_")
+        # Sanitize for cross-platform filenames (e.g. ':' is illegal on Windows).
+        safe_id = job_id
+        for char in r'\/:*?"<>|':
+            safe_id = safe_id.replace(char, "_")
         return self._root_dir / f"{safe_id}.json"
 
     def get_job_state(self, job_id: str) -> JobState:

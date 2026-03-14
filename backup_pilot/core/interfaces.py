@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import BinaryIO, Protocol
 
-from .models import BackupRequest, BackupResult, RestoreRequest, RestoreResult
+from .models import BackupRequest, BackupResult, BackupType, RestoreRequest, RestoreResult
 
 
 class DatabaseConnector(ABC):
@@ -41,6 +42,16 @@ class BackupStrategy(ABC):
         """
         Execute a backup using the provided connector.
         """
+
+    def record_success(
+        self, backup_id: str, backup_type: BackupType, created_at: datetime
+    ) -> None:
+        """
+        Called by the service after a backup is successfully uploaded.
+        Override to persist metadata (e.g. for future incremental/differential).
+        Default is no-op.
+        """
+        pass
 
 
 class StorageBackend(ABC):

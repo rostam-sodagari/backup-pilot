@@ -80,8 +80,11 @@ class BackupService:
             backup_id="",
             status=BackupStatus.PENDING,
             started_at=started_at,
-            db_profile_name=request.profile_name,
+            db_profile_name=self._base_log_context.get("db_profile_name"),
             db_type=request.db_type,
+            storage_profile_name=self._base_log_context.get("storage_profile_name"),
+            storage_type=self._base_log_context.get("storage_type"),
+            encryption_mode=self._base_log_context.get("encryption_mode"),
         )
 
         self._logger.info(
@@ -130,6 +133,10 @@ class BackupService:
                 or strategy_result.started_at.strftime("%Y%m%d%H%M%S")
             )
             location = self._storage.upload(backup_id, stream_to_upload)
+
+            self._strategy.record_success(
+                backup_id, request.backup_type, strategy_result.started_at
+            )
 
             result.backup_id = backup_id
             result.status = BackupStatus.SUCCESS

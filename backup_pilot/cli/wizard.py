@@ -60,7 +60,7 @@ def run_wizard(
     cfg_path = Path(config_file)
     if cfg_path.exists():
         cfg = load_config(str(cfg_path))
-        raw = cfg.model_dump(mode="json")
+        raw = cfg.model_dump(mode="json", by_alias=True)
     else:
         raw = {
             "databases": {},

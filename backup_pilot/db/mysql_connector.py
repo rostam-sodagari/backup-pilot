@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import subprocess
 from io import BufferedReader
-from typing import BinaryIO, Dict, Any
+from typing import BinaryIO
 
 from backup_pilot.core.exceptions import ConnectionError
 from backup_pilot.core.interfaces import DatabaseConnector
@@ -72,50 +72,6 @@ class MySQLConnector(DatabaseConnector):
         )
         assert proc.stdout is not None
         return BufferedReader(proc.stdout)
-
-    def get_current_binlog_position(self) -> Dict[str, Any]:
-        """
-        Return the current binary log file and position for the server.
-
-        This helper is intended for incremental/differential strategies
-        that consume binlog events starting from a recorded position.
-        """
-        cmd = [
-            "mysql",
-            "-h",
-            self._p.host or "localhost",
-            "-P",
-            str(self._p.port or 3306),
-            "-u",
-            self._p.username or "",
-            "-e",
-            "SHOW MASTER STATUS;",
-        ]
-        if self._p.database:
-            cmd.extend(["-D", self._p.database])
-
-        try:
-            raw = subprocess.check_output(
-                cmd,
-                env=self._base_env(),
-                stderr=subprocess.DEVNULL,
-                text=True,
-            )
-        except Exception as exc:  # pragma: no cover - depends on local tooling
-            raise ConnectionError("Failed to obtain MySQL binlog position") from exc
-
-        # Expected format (tab-separated header and row):
-        # File    Position    Binlog_Do_DB    Binlog_Ignore_DB ...
-        lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
-        if len(lines) < 2:  # pragma: no cover - defensive branch
-            raise ConnectionError("Unexpected output from SHOW MASTER STATUS")
-        headers = lines[0].split("\t")
-        values = lines[1].split("\t")
-        data = dict(zip(headers, values))
-        return {
-            "file": data.get("File"),
-            "position": int(data.get("Position", "0") or 0),
-        }
 
     def restore_from_stream(self, request: RestoreRequest, stream: BinaryIO) -> None:
         cmd = [
