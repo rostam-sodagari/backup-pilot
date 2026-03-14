@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 import yaml
@@ -43,8 +42,12 @@ def run_wizard(
     host = typer.prompt("Database host", default="localhost").strip()
     port = typer.prompt("Database port", default="3306").strip()
     username = typer.prompt("Database username", default="root").strip()
-    password = typer.prompt("Database password (leave blank to use env/.env)", default="", hide_input=True)
-    database = typer.prompt("Database name (or leave blank for URI-only)", default="").strip()
+    password = typer.prompt(
+        "Database password (leave blank to use env/.env)", default="", hide_input=True
+    )
+    database = typer.prompt(
+        "Database name (or leave blank for URI-only)", default=""
+    ).strip()
 
     storage_name = typer.prompt("Storage profile name", default="local_fs").strip()
     storage_root = typer.prompt("Local backup directory", default="./backups").strip()
@@ -52,9 +55,7 @@ def run_wizard(
     backup_profile_name = typer.prompt(
         "Backup profile name", default="daily_backup"
     ).strip()
-    backup_type = typer.prompt(
-        "Backup type (full only)", default="full"
-    ).strip()
+    backup_type = typer.prompt("Backup type (full only)", default="full").strip()
 
     cfg_path = Path(config_file)
     if cfg_path.exists():
@@ -107,4 +108,3 @@ def run_wizard(
         profile=backup_profile_name,
         config_file=str(cfg_path),
     )
-

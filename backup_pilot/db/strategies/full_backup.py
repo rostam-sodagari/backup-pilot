@@ -17,17 +17,17 @@ class FullBackupStrategy(BackupStrategy):
     and differential support.
     """
 
-    def __init__(self, metadata_store: BackupMetadataStore | None = None, job_id: str | None = None) -> None:
+    def __init__(
+        self,
+        metadata_store: BackupMetadataStore | None = None,
+        job_id: str | None = None,
+    ) -> None:
         self._store = metadata_store
         self._job_id = job_id
 
     def run(self, connector: DatabaseConnector, request: BackupRequest) -> BackupResult:
         started_at = datetime.now(timezone.utc)
         backup_id = started_at.strftime("%Y%m%d%H%M%S")
-
-        # Trigger creation of the logical backup stream; the surrounding
-        # BackupService is responsible for piping it to storage.
-        stream = connector.create_backup_stream(request)
 
         if self._store and self._job_id:
             point = BackupPoint(

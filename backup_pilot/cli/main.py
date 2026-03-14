@@ -9,7 +9,12 @@ import typer
 from dotenv import load_dotenv
 
 from backup_pilot.config.loader import load_config
-from backup_pilot.core.models import BackupRecord, BackupRequest, RestoreRequest, BackupType
+from backup_pilot.core.models import (
+    BackupRecord,
+    BackupRequest,
+    RestoreRequest,
+    BackupType,
+)
 from backup_pilot.db.base import DBConnectionParams
 from backup_pilot.db.factory import create_connector, create_strategy
 from backup_pilot.logging.logger import configure_logger_from_config, get_logger

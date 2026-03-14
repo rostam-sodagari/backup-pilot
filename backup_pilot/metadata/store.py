@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, TypedDict, Literal
+from typing import Optional, TypedDict
 
 from backup_pilot.core.models import BackupType
 
@@ -136,4 +136,3 @@ class BackupMetadataStore:
         state.last_backup = point
         self._save(state)
         return state
-

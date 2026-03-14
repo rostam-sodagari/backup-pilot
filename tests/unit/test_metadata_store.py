@@ -26,4 +26,3 @@ def test_metadata_store_persists_and_loads_job_state(tmp_path: Path) -> None:
     assert loaded.last_full.backup_id == "backup-001"
     assert loaded.last_full.backup_type == BackupType.FULL
     assert loaded.last_full.position["file"] == "binlog.000001"
-

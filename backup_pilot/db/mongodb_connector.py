@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import subprocess
-from datetime import datetime, timezone
 from io import BufferedReader
 from typing import BinaryIO, Dict, Any
 
